@@ -21,6 +21,14 @@ export const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    activationToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   {
     tableName: "User",
