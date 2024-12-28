@@ -4,13 +4,13 @@ import { v4 as uuidv4 } from "uuid";
 
 const register = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, firstName } = req.body;
     const activationToken = uuidv4();
 
-    if (!email || !password) {
+    if (!email || !password || !firstName) {
       return res
         .status(400)
-        .json({ message: "Email and password are required" });
+        .json({ message: "Email, password, and firstName are required" });
     }
 
     const existingUser = await User.findOne({ where: { email } });
@@ -20,26 +20,36 @@ const register = async (req, res) => {
     }
 
     const newUser = await User.create({
+      firstName,
       email,
       password,
       activationToken,
     });
 
-    await emailService.sendActivationEmail({
-      email: newUser.email,
-      token: activationToken,
-    });
+    try {
+      await emailService.sendActivationEmail({
+        email: newUser.email,
+        token: activationToken,
+      });
+    } catch (emailError) {
+      console.error("Failed to send activation email:", emailError);
+    }
 
     res.status(201).json({
       message: "User registered successfully",
       user: {
-        userId: newUser.id,
+        userId: newUser.userId,
         email: newUser.email,
+        firstName: newUser.firstName
       },
     });
   } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Registration error:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ 
+      message: "Internal server error",
+      error: error.message
+    });
   }
 };
 
@@ -51,7 +61,6 @@ const activate = async (req, res) => {
     return res.status(404).json({ message: "User not found" });
   }
 
-  user.isActive = true;
   user.activationToken = null;
   await user.save();
 
@@ -60,7 +69,7 @@ const activate = async (req, res) => {
     user: {
       userId: user.id,
       email: user.email,
-      isActive: user.isActive,
+      firstName: user.firstName,
       activationToken: user.activationToken,
       createdAt: user.createdAt,
     },
