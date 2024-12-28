@@ -1,6 +1,8 @@
+import { v4 as uuidv4 } from "uuid";
 import { User } from "../models/user.js";
 import { emailService } from "../services/email.service.js";
-import { v4 as uuidv4 } from "uuid";
+import { userService } from "../services/user.service.js";
+import { jwtService } from "../services/jwt.service.js";
 
 const register = async (req, res) => {
   try {
@@ -40,15 +42,15 @@ const register = async (req, res) => {
       user: {
         userId: newUser.userId,
         email: newUser.email,
-        firstName: newUser.firstName
+        firstName: newUser.firstName,
       },
     });
   } catch (error) {
     console.error("Registration error:", error.message);
     console.error(error.stack);
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Internal server error",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -76,7 +78,30 @@ const activate = async (req, res) => {
   });
 };
 
+const login = async (req, res) => {
+  const { email, password } = req.body;
+  const user = await userService.getUserByEmail(email);
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  if (user.password !== password) {
+    return res.status(401).json({ message: "Invalid password" });
+  }
+
+  const token = jwtService.generateToken({ userId: user.userId });
+  const normalizedUser = userService.normalizeUser(user);
+
+  res.status(200).json({
+    message: "Login successful",
+    user: normalizedUser,
+    token,
+  });
+};
+
 export const authController = {
   register,
   activate,
+  login,
 };
