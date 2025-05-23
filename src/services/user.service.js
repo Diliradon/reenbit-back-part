@@ -1,16 +1,12 @@
 import { User } from "../models/user.js";
 
 const getAllUsers = async () => {
-  return await User.findAll({
-    where: {
-      activationToken: null,
-    },
-  });
+  return await User.find({ activationToken: null });
 };
 
 const normalizeUser = (user) => {
   return {
-    userId: user.userId,
+    userId: user._id,
     firstName: user.firstName,
     email: user.email,
     activationToken: user.activationToken,
@@ -20,9 +16,7 @@ const normalizeUser = (user) => {
 
 const getUserByEmail = async (email) => {
   const user = await User.findOne({
-    where: {
-      email: email.toLowerCase(),
-    },
+    email: email.toLowerCase(),
   });
 
   return user;

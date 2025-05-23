@@ -15,7 +15,7 @@ const register = async (req, res) => {
         .json({ message: "Email, password, and firstName are required" });
     }
 
-    const existingUser = await User.findOne({ where: { email } });
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
@@ -40,7 +40,7 @@ const register = async (req, res) => {
     res.status(201).json({
       message: "User registered successfully",
       user: {
-        userId: newUser.userId,
+        userId: newUser._id,
         email: newUser.email,
         firstName: newUser.firstName,
       },
@@ -57,7 +57,7 @@ const register = async (req, res) => {
 
 const activate = async (req, res) => {
   const { token } = req.params;
-  const user = await User.findOne({ where: { activationToken: token } });
+  const user = await User.findOne({ activationToken: token });
 
   if (!user) {
     return res.status(404).json({ message: "User not found" });
@@ -69,7 +69,7 @@ const activate = async (req, res) => {
   res.status(200).json({
     message: "User activated successfully",
     user: {
-      userId: user.id,
+      userId: user._id,
       email: user.email,
       firstName: user.firstName,
       activationToken: user.activationToken,
@@ -90,7 +90,7 @@ const login = async (req, res) => {
     return res.status(401).json({ message: "Invalid password" });
   }
 
-  const token = jwtService.generateToken({ userId: user.userId });
+  const token = jwtService.generateToken({ userId: user._id });
   const normalizedUser = userService.normalizeUser(user);
 
   res.status(200).json({
@@ -100,8 +100,26 @@ const login = async (req, res) => {
   });
 };
 
+const logout = async (req, res) => {
+  try {
+    // Since we're using JWT, we don't need to invalidate the token server-side
+    // The client will remove the token from storage
+    
+    res.status(200).json({
+      message: "Logged out successfully"
+    });
+  } catch (error) {
+    console.error("Logout error:", error.message);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+};
+
 export const authController = {
   register,
   activate,
   login,
+  logout,
 };
