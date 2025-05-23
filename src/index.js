@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import express from 'express'
 import authRouter from './routes/auth.route.js'
+import usersRouter from './routes/users.route.js'
 import { connectDB } from './utils/db.js'
 import cors from 'cors'
 
@@ -19,6 +20,7 @@ app.use(cors({
 }))
 
 app.use('/auth', authRouter)
+app.use('/users', usersRouter)
 
 app.get('/', (req, res) => {
   res.send('Hello World')
