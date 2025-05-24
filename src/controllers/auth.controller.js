@@ -55,29 +55,6 @@ const register = async (req, res) => {
   }
 };
 
-const activate = async (req, res) => {
-  const { token } = req.params;
-  const user = await User.findOne({ activationToken: token });
-
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
-
-  user.activationToken = null;
-  await user.save();
-
-  res.status(200).json({
-    message: "User activated successfully",
-    user: {
-      userId: user._id,
-      email: user.email,
-      firstName: user.firstName,
-      activationToken: user.activationToken,
-      createdAt: user.createdAt,
-    },
-  });
-};
-
 const login = async (req, res) => {
   const { email, password } = req.body;
   const user = await userService.getUserByEmail(email);
@@ -119,7 +96,6 @@ const logout = async (req, res) => {
 
 export const authController = {
   register,
-  activate,
   login,
   logout,
 };

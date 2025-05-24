@@ -29,12 +29,6 @@ export const authenticate = async (req, res, next) => {
       });
     }
 
-    if (user.activationToken !== null) {
-      return res.status(401).json({
-        message: "Account not activated"
-      });
-    }
-
     // Attach user information to request
     req.user = {
       userId: user._id,
