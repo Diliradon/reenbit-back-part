@@ -67,6 +67,13 @@ const login = async (req, res) => {
     return res.status(401).json({ message: "Invalid password" });
   }
 
+  // Auto-activate user if they still have an activation token (for development)
+  if (user.activationToken !== null) {
+    user.activationToken = null;
+    await user.save();
+    console.log(`Auto-activated user ${user.email} on login`);
+  }
+
   const token = jwtService.generateToken({ userId: user._id });
   const normalizedUser = userService.normalizeUser(user);
 
@@ -94,8 +101,49 @@ const logout = async (req, res) => {
   }
 };
 
+const activate = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    if (!token) {
+      return res.status(400).json({ 
+        message: "Activation token is required" 
+      });
+    }
+
+    // Find user with the activation token
+    const user = await User.findOne({ activationToken: token });
+
+    if (!user) {
+      return res.status(400).json({ 
+        message: "Invalid or expired activation token" 
+      });
+    }
+
+    // Activate the user by setting activationToken to null
+    user.activationToken = null;
+    await user.save();
+
+    res.status(200).json({
+      message: "Account activated successfully",
+      user: {
+        userId: user._id,
+        email: user.email,
+        firstName: user.firstName,
+      },
+    });
+  } catch (error) {
+    console.error("Activation error:", error.message);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
 export const authController = {
   register,
   login,
   logout,
+  activate,
 };

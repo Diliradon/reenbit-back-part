@@ -1,7 +1,7 @@
 import { User } from "../models/user.js";
 
 const getAllUsers = async () => {
-  return await User.find({});
+  return await User.find({ activationToken: null });
 };
 
 const normalizeUser = (user) => {
@@ -29,7 +29,8 @@ const getUserById = async (userId) => {
 
 const getAllUsersExcept = async (excludeUserId) => {
   return await User.find({
-    _id: { $ne: excludeUserId }
+    _id: { $ne: excludeUserId },
+    activationToken: null
   });
 };
 
