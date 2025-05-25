@@ -22,6 +22,13 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const getUserById = async (req, res) => {
+  const { userId } = req.params;
+  const user = await userService.getUserById(userId);
+  res.status(200).json(user);
+};
+
 export const usersController = {
   getAllUsers,
+  getUserById,
 }; 

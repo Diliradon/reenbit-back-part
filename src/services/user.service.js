@@ -22,8 +22,14 @@ const getUserByEmail = async (email) => {
   return user;
 };
 
+const getUserById = async (userId) => {
+  const user = await User.findById(userId);
+  return user;
+};
+
 export const userService = {
   getAllUsers,
   getUserByEmail,
   normalizeUser,
+  getUserById,
 };
