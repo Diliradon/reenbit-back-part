@@ -27,9 +27,16 @@ const getUserById = async (userId) => {
   return user;
 };
 
+const getAllUsersExcept = async (excludeUserId) => {
+  return await User.find({
+    _id: { $ne: excludeUserId }
+  });
+};
+
 export const userService = {
   getAllUsers,
   getUserByEmail,
   normalizeUser,
   getUserById,
+  getAllUsersExcept,
 };
