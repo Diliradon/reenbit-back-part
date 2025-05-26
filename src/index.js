@@ -5,6 +5,7 @@ import { Server } from 'socket.io'
 import authRouter from './routes/auth.route.js'
 import usersRouter from './routes/users.route.js'
 import messageRouter from './routes/message.route.js'
+import langchainRoutes from './routes/langchain.route.js';
 import { connectDB } from './utils/db.js'
 import { handleSocketConnection } from './socket/socket.handlers.js'
 import cors from 'cors'
@@ -36,6 +37,7 @@ app.use(cors({
 app.use('/auth', authRouter)
 app.use('/users', usersRouter)
 app.use('/messages', messageRouter)
+app.use('/chat', langchainRoutes); 
 
 app.get('/', (req, res) => {
   res.send('Hello World - Socket.IO Chat Server')
