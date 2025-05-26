@@ -65,13 +65,15 @@ const getConversation = async (req, res) => {
 const getUserConversations = async (req, res) => {
   try {
     const userId = req.user.userId;
+    const { query } = req.query;
 
-    const conversations = await messageService.getUserConversations(userId);
+    const conversations = await messageService.getUserConversations(userId, query);
 
     res.status(200).json({
-      message: "Conversations retrieved successfully",
+      message: query ? "Conversations search completed successfully" : "Conversations retrieved successfully",
       data: conversations,
-      count: conversations.length
+      count: conversations.length,
+      ...(query && { searchQuery: query.trim() })
     });
   } catch (error) {
     console.error("Get conversations error:", error.message);
