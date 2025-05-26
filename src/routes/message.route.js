@@ -10,7 +10,7 @@ messageRouter.use(authenticate);
 // Send a new message
 messageRouter.post('/', messageController.sendMessage);
 
-// Get all conversations for the current user
+// Get all conversations for the current user (supports search via query parameter)
 messageRouter.get('/conversations', messageController.getUserConversations);
 
 // Get conversation between current user and specific user

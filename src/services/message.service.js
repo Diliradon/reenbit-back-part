@@ -31,16 +31,18 @@ const getConversation = async (userId1, userId2, page = 1, limit = 50) => {
   return messages.reverse(); // Return in chronological order
 };
 
-const getUserConversations = async (userId) => {
-  const conversations = await Message.aggregate([
+const getUserConversations = async (userId, searchQuery = null) => {
+  const matchStage = {
+    $or: [
+      { sender: new mongoose.Types.ObjectId(userId) },
+      { recipient: new mongoose.Types.ObjectId(userId) }
+    ],
+    isDeleted: false
+  };
+
+  const pipeline = [
     {
-      $match: {
-        $or: [
-          { sender: new mongoose.Types.ObjectId(userId) },
-          { recipient: new mongoose.Types.ObjectId(userId) }
-        ],
-        isDeleted: false
-      }
+      $match: matchStage
     },
     {
       $sort: { createdAt: -1 }
@@ -81,7 +83,20 @@ const getUserConversations = async (userId) => {
     },
     {
       $unwind: "$user"
-    },
+    }
+  ];
+
+  // Add search filter if searchQuery is provided
+  if (searchQuery && searchQuery.trim() !== '') {
+    pipeline.push({
+      $match: {
+        "user.firstName": { $regex: searchQuery.trim(), $options: "i" }
+      }
+    });
+  }
+
+  // Add final projection and sorting
+  pipeline.push(
     {
       $project: {
         user: {
@@ -100,8 +115,9 @@ const getUserConversations = async (userId) => {
     {
       $sort: { "lastMessage.createdAt": -1 }
     }
-  ]);
+  );
 
+  const conversations = await Message.aggregate(pipeline);
   return conversations;
 };
 
